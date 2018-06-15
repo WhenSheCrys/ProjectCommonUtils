@@ -1,14 +1,17 @@
-package com.haiyisoft.utils
+package com.haiyisoft.xsjs.utils
 
 import java.net.URI
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.permission.{FsAction, FsPermission}
 import org.apache.hadoop.fs.{FileStatus, FileSystem, FileUtil, Path}
+import org.apache.log4j.Logger
 
 import scala.collection.mutable.ArrayBuffer
 
 class HDFSUtil(hdfsBasePath: String) {
+
+  private[this] val logger = Logger.getLogger(this.getClass)
 
   System.setProperty("HADOOP_USER_NAME", "hdfs")
   System.setProperty("user.name", "hdfs")
@@ -68,7 +71,7 @@ class HDFSUtil(hdfsBasePath: String) {
   /**
     * 列出所有目录
     *
-    * @param path 目录
+    * @param path      目录
     * @param recursive 递归
     * @return
     */
@@ -84,21 +87,40 @@ class HDFSUtil(hdfsBasePath: String) {
   }
 
   /**
+    * 删除
+    *
+    * @param paths
+    */
+  def delete(paths: String*): Unit = {
+    paths.par.foreach { path =>
+      if (fs.exists(getPath(path))) {
+        if (fs.isDirectory(getPath(path))) {
+          deleteDir(path)
+        } else {
+          deleteFile(path)
+        }
+      } else {
+        logger.error(s"$path not exists, SKIP DELETE!")
+      }
+    }
+  }
+
+  /**
     * 删除目录
     *
     * @param paths
     */
-  def deleteDir(paths: String*): Unit = {
+  private def deleteDir(paths: String*): Unit = {
     paths.par.foreach { path =>
       if (fs.exists(getPath(path)) && fs.isDirectory(getPath(path))) {
-        println(s"try to delete $path")
+        logger.info(s"try to delete $path")
         val dirs = listDirs(path)
         deleteDir(dirs: _*)
         val files = listAllFiles(path, recursive = false)
         deleteFile(files: _*)
         fs.delete(getPath(path), true)
       } else {
-        println(s"$path is not a Dir or not exits")
+        logger.error(s"$path is not a Dir or not exits")
       }
     }
   }
@@ -108,20 +130,46 @@ class HDFSUtil(hdfsBasePath: String) {
     *
     * @param paths
     */
-  def deleteFile(paths: String*): Unit = {
+  private def deleteFile(paths: String*): Unit = {
     paths.par.foreach { path =>
-      if (fs.exists(getPath(path)) && !fs.isDirectory(getPath(path))) {
-        println(s"try to delete $path")
-        val res = fs.delete(getPath(path), true)
-        if (res) {
-          println(s"complete deleting $path")
+      if (fs.exists(getPath(path))) {
+        if (fs.isFile(getPath(path))) {
+          logger.info(s"try to delete $path")
+          val res = fs.delete(getPath(path), true)
+          if (res) {
+            logger.info(s"complete deleting $path")
+          } else {
+            logger.info(s"an error occurred during deleting $path")
+          }
         } else {
-          println(s"an error occurred during deleting $path")
+          logger.warn(s"$path is not a file! SKIP DELETE!")
         }
+      } else {
+        logger.warn(s"$path not exits! SKIP DELETE!")
       }
-      else {
-        println(s"$path is not a Dir")
+    }
+  }
+
+  /**
+    * 删除到回收站
+    *
+    * @param paths
+    */
+  def moveToTrash(paths: String*): Unit = {
+    val hadoop_user_name = System.getProperty("HADOOP_USER_NAME").trim
+    val user_name = System.getProperty("user.name").trim
+    val user = if (hadoop_user_name.isEmpty) {
+      if (user_name.isEmpty) {
+        "hdfs"
+      } else {
+        user_name
       }
+    } else {
+      hadoop_user_name
+    }
+    val trashPath = s"/user/$user/.Trash"
+    paths.par.foreach { path =>
+      move(path, trashPath)
     }
   }
 
@@ -131,44 +179,47 @@ class HDFSUtil(hdfsBasePath: String) {
     * @param source
     * @param dest
     */
-  def move(source: String, dest: String): Unit = {
-    copy(source, dest, deleteSourceFile = true)
+  def move(source: String, dest: String): Unit
+  = {
+    if (!exists(source)) {
+      logger.error(s"Sourc path:$source not exists!")
+    } else {
+      copy(source, dest, deleteSourceFile = true)
+      logger.info(s"moved $source to $dest!")
+    }
   }
 
   /**
     * 复制
     *
-    * @param source 源地址
-    * @param destination 目标地址
+    * @param source           源地址
+    * @param destination      目标地址
     * @param deleteSourceFile 是否删除源文件
-    * @param overWrite 是否覆盖
+    * @param overWrite        是否覆盖
     * @return
     */
-  def copy(source: String, destination: String, deleteSourceFile: Boolean = false, overWrite: Boolean = false): Boolean = {
+  def copy(source: String, destination: String, deleteSourceFile: Boolean = false, overWrite: Boolean = false): Unit = {
     val sourceFile = getPath(source)
     val destFile = getPath(destination)
 
-    if (!fs.exists(destFile)) {
-      fs.mkdirs(destFile)
-    }
-
-    if (fs.exists(sourceFile) && fs.exists(destFile)) {
-      if (fs.isDirectory(sourceFile) && fs.isDirectory(destFile)) {
-        val sourceDir = new FileStatus()
-        sourceDir.setPath(sourceFile)
-        FileUtil.copy(fs, sourceDir, fs, destFile, deleteSourceFile, overWrite, new Configuration())
-      } else if (fs.isFile(sourceFile) && fs.isDirectory(destFile)) {
-        FileUtil.copy(fs, sourceFile, fs, destFile, deleteSourceFile, overWrite, new Configuration())
-      } else if (fs.isFile(sourceFile) && fs.isFile(destFile)) {
-        FileUtil.copy(fs, sourceFile, fs, destFile, deleteSourceFile, overWrite, new Configuration())
+    if (fs.exists(sourceFile)) {
+      val sourceDir = new FileStatus()
+      sourceDir.setPath(sourceFile)
+      if (!fs.exists(destFile)) {
+        FileUtil.copy(fs, sourceDir, fs, destFile, deleteSourceFile, overWrite, fs.getConf)
       } else {
-        println("cant copy a directory to a file")
-        false
+        if (fs.isDirectory(sourceFile) && fs.isFile(destFile)) {
+          logger.error("can't copy a directory to a file!", new RuntimeException("can't copy a directory to a file!"))
+        } else if (fs.isFile(sourceFile) && fs.isFile(destFile)) {
+          logger.error(s"destination:$destination already exists!", new RuntimeException(s"destination:$destination already exists!"))
+        } else {
+          FileUtil.copy(fs, sourceDir, fs, destFile, deleteSourceFile, overWrite, fs.getConf)
+        }
       }
     } else {
-      println("sorce file or destination file not exits")
-      false
+      logger.error(s"source:$source not exists!", new RuntimeException(s"source:$source not exists!"))
     }
+
   }
 
   /**
@@ -200,7 +251,7 @@ class HDFSUtil(hdfsBasePath: String) {
     val oldOwner = fs.getFileStatus(p).getOwner
 
     if (group.equals(oldGroup) && owner.equals(oldOwner)) {
-      println("组名和用户名未改变")
+      logger.warn("组名和用户名未改变")
     } else {
       try {
         fs.setOwner(p, owner, group)
@@ -208,7 +259,7 @@ class HDFSUtil(hdfsBasePath: String) {
           listDirs(path).par.foreach(p1 => chown(p1, group, owner, recursive))
           listAllFiles(path, recursive = false).par.foreach(p1 => chown(p1, group, owner, recursive = false))
         }
-        println(s"changed owner for [$path]")
+        logger.info(s"changed owner for [$path]")
       } catch {
         case e: Exception =>
           e.printStackTrace()
@@ -247,22 +298,15 @@ class HDFSUtil(hdfsBasePath: String) {
       * @return
       */
     def getPermission(p: Int): FsAction = {
-      if (p == 0) {
-        FsAction.NONE
-      } else if (p == 1) {
-        FsAction.EXECUTE
-      } else if (p == 2) {
-        FsAction.WRITE
-      } else if (p == 3) {
-        FsAction.WRITE_EXECUTE
-      } else if (p == 4) {
-        FsAction.READ
-      } else if (p == 5) {
-        FsAction.READ_EXECUTE
-      } else if (p == 6) {
-        FsAction.READ_WRITE
-      } else {
-        FsAction.ALL
+      p match {
+        case 1 => FsAction.EXECUTE
+        case 2 => FsAction.WRITE
+        case 3 => FsAction.WRITE_EXECUTE
+        case 4 => FsAction.READ
+        case 5 => FsAction.READ_EXECUTE
+        case 6 => FsAction.READ_WRITE
+        case 7 => FsAction.ALL
+        case _ => FsAction.NONE
       }
     }
 
@@ -289,8 +333,8 @@ class HDFSUtil(hdfsBasePath: String) {
   /**
     * 改变权限
     *
-    * @param path 路径
-    * @param mod 权限 形如 "777", "766", "664" 的形式
+    * @param path      路径
+    * @param mod       权限 形如 "777", "766", "664" 的形式
     * @param recursive 递归
     */
   def chmod(path: String, mod: String, recursive: Boolean = true): Unit = {
@@ -312,10 +356,14 @@ class HDFSUtil(hdfsBasePath: String) {
     * @param path
     * @return
     */
-  def mkDir(path: String): Boolean = {
+  def mkDir(path: String): Unit = {
     if (fs.exists(getPath(path))) {
-      println(s"$path already exits")
-      false
+      if (fs.isDirectory(getPath(path))) {
+        logger.error(s"$path already exits")
+      } else {
+        logger.warn(s"already has a file named $path! but we created a directory.")
+        fs.mkdirs(getPath(path))
+      }
     } else {
       fs.mkdirs(getPath(path))
     }
@@ -327,10 +375,13 @@ class HDFSUtil(hdfsBasePath: String) {
     * @param path
     * @return
     */
-  def createFile(path: String): Boolean = {
+  def createFile(path: String): Unit = {
     if (fs.exists(getPath(path))) {
-      println(s"$path already exits")
-      false
+      if (fs.isFile(getPath(path))) {
+        logger.error(s"$path already exits")
+      } else {
+        fs.createNewFile(getPath(path))
+      }
     } else {
       fs.createNewFile(getPath(path))
     }

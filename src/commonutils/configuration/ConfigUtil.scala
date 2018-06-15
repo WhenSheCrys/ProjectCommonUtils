@@ -1,4 +1,4 @@
-package com.haiyisoft.utils
+package commonutils.configuration
 
 import java.util.Properties
 

@@ -1,8 +1,8 @@
-package com.haiyisoft.utils
+package commonutils.bigdata
 
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import org.apache.log4j.{Logger, Level}
 
 object SparkUtil {
   def getSparkSession(isLocal: Boolean = false, conf: Map[String, String] = Map()): SparkSession = {
