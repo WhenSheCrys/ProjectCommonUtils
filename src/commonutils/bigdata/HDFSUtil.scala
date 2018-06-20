@@ -406,13 +406,11 @@ class HDFSUtil(hdfsBasePath: String) {
   def exists(path: String): Boolean = {
     fs.exists(getPath(path))
   }
+
+  def close: Unit = {
+    fs.close()
+  }
+
 }
 
-/**
-  * 伴生
-  */
-object HDFSUtil {
-  def getInstance(baseUrl: String): HDFSUtil = {
-    new HDFSUtil(baseUrl)
-  }
 }
