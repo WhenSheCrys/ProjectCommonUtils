@@ -1,5 +1,4 @@
-package com.haiyisoft.xsjs.utils
-
+package commonutils.bigdata
 import java.net.URI
 
 import org.apache.hadoop.conf.Configuration
