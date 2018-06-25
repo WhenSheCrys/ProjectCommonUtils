@@ -3,8 +3,9 @@ package commonutils.configuration
 import java.io.{File, FileInputStream}
 import java.util.Properties
 
-import scala.collection.JavaConverters._
 import org.json.JSONObject
+
+import scala.collection.JavaConverters._
 
 private[configuration] class PropertiesUtil(private val fileName: String = "config.properties") extends ConfigurationUtil {
 

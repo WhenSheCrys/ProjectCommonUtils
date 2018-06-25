@@ -1,4 +1,4 @@
-package com.haiyisoft.xsjs.utils
+package commonutils.bigdata
 
 import java.net.URI
 
@@ -9,7 +9,7 @@ import org.apache.log4j.Logger
 
 import scala.collection.mutable.ArrayBuffer
 
-class HDFSUtil(hdfsBasePath: String) {
+class HdfsUtil(hdfsBasePath: String) {
 
   private[this] val logger = Logger.getLogger(this.getClass)
 
