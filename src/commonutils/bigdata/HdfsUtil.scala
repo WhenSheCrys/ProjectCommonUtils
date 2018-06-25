@@ -4,7 +4,7 @@ import java.net.URI
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.permission.{FsAction, FsPermission}
-import org.apache.hadoop.fs.{FileStatus, FileSystem, FileUtil, Path}
+import org.apache.hadoop.fs.{FileSystem, FileUtil, Path}
 import org.apache.log4j.Logger
 
 import scala.collection.mutable.ArrayBuffer
@@ -25,28 +25,53 @@ class HdfsUtil(hdfsBasePath: String) {
   }
 
   /**
-    * 列出目录下所有文件,不包括目录
+    * 列出目录下所有文件，包括文件和文件夹
     *
-    * @param path
+    * @param path 路径
     * @return
     */
-  def listFiles(path: String): Array[String] = {
+  def list(path: String): Array[String] = {
     fs.listStatus(getPath(path)).map(_.getPath.toUri.getPath)
   }
 
   /**
-    * 列出目录下所有目录
+    * 列出目录下的文件，只有文件
     *
-    * @param path
-    * @param recursive
+    * @param path 路径
     * @return
     */
-  def listDirs(path: String, recursive: Boolean = false): Array[String] = {
+  def listFiles(path: String): Array[String] = {
+    fs.listStatus(getPath(path)).filter(_.isFile).map(_.getPath.toUri.getPath)
+  }
+
+  /**
+    * 获取HDFS地址
+    *
+    * @param path 路径
+    * @return
+    */
+  def getPath(path: String): Path = {
+    //    if (path.toLowerCase().startsWith("hdfs://")) {
+    //      new Path(path)
+    //    } else {
+    //      new Path(hdfsBasePath + path)
+    //    }
+    new Path(path)
+  }
+
+  /**
+    * 列出目录下所有目录，只有目录
+    *
+    * @param path      路径
+    * @param recursive 是否递归
+    * @return
+    */
+  def listAllDirs(path: String, recursive: Boolean = false): Array[String] = {
     val arr = ArrayBuffer[String]()
     val paths = fs.listStatus(getPath(path)).filter(_.isDirectory).map(_.getPath.toUri.getPath)
     if (recursive) {
       paths.foreach { x =>
-        listDirs(x, recursive).foreach(arr.append(_))
+        listAllDirs(x, recursive).foreach(arr.append(_))
         arr.append(x)
       }
     } else {
@@ -56,22 +81,33 @@ class HdfsUtil(hdfsBasePath: String) {
   }
 
   /**
+    * 列出目录
+    *
+    * @param path 路径
+    * @return
+    */
+  def listDirs(path: String): Array[String] = {
+    val dirs = fs.listStatus(getPath(path))
+    dirs.filter(_.isDirectory).map(_.getPath.toUri.getPath)
+  }
+
+  /**
     * 列出最底层目录
     *
-    * @param path
+    * @param path 路径
     * @return
     */
   def listBottomDirs(path: String): Array[String] = {
-    val dirs = listDirs(path, true)
+    val dirs = listAllDirs(path, true)
     dirs.filter { x =>
-      listDirs(x, true).length == 0
+      listAllDirs(x, true).length == 0
     }
   }
 
   /**
-    * 列出所有目录
+    * 列出所有文件，不包括目录
     *
-    * @param path      目录
+    * @param path      路径
     * @param recursive 递归
     * @return
     */
@@ -89,7 +125,7 @@ class HdfsUtil(hdfsBasePath: String) {
   /**
     * 删除
     *
-    * @param paths
+    * @param paths 路径
     */
   def delete(paths: String*): Unit = {
     paths.par.foreach { path =>
@@ -106,54 +142,9 @@ class HdfsUtil(hdfsBasePath: String) {
   }
 
   /**
-    * 删除目录
-    *
-    * @param paths
-    */
-  private def deleteDir(paths: String*): Unit = {
-    paths.par.foreach { path =>
-      if (fs.exists(getPath(path)) && fs.isDirectory(getPath(path))) {
-        logger.info(s"try to delete $path")
-        val dirs = listDirs(path)
-        deleteDir(dirs: _*)
-        val files = listAllFiles(path, recursive = false)
-        deleteFile(files: _*)
-        fs.delete(getPath(path), true)
-      } else {
-        logger.error(s"$path is not a Dir or not exits")
-      }
-    }
-  }
-
-  /**
-    * 删除文件
-    *
-    * @param paths
-    */
-  private def deleteFile(paths: String*): Unit = {
-    paths.par.foreach { path =>
-      if (fs.exists(getPath(path))) {
-        if (fs.isFile(getPath(path))) {
-          logger.info(s"try to delete $path")
-          val res = fs.delete(getPath(path), true)
-          if (res) {
-            logger.info(s"complete deleting $path")
-          } else {
-            logger.info(s"an error occurred during deleting $path")
-          }
-        } else {
-          logger.warn(s"$path is not a file! SKIP DELETE!")
-        }
-      } else {
-        logger.warn(s"$path not exits! SKIP DELETE!")
-      }
-    }
-  }
-
-  /**
     * 删除到回收站
     *
-    * @param paths
+    * @param paths 路径
     */
   def moveToTrash(paths: String*): Unit = {
     val hadoop_user_name = System.getProperty("HADOOP_USER_NAME").trim
@@ -167,20 +158,19 @@ class HdfsUtil(hdfsBasePath: String) {
     } else {
       hadoop_user_name
     }
-    val trashPath = s"/user/$user/.Trash"
+    val trashPath = s"/user/$user/.Trash/"
     paths.par.foreach { path =>
-      move(path, trashPath)
+      copy(path, trashPath, deleteSourceFile = true, overWrite = true)
     }
   }
 
   /**
     * 移动
     *
-    * @param source
-    * @param dest
+    * @param source 源路径
+    * @param dest   目标路径
     */
-  def move(source: String, dest: String): Unit
-  = {
+  def move(source: String, dest: String): Unit = {
     if (!exists(source)) {
       logger.error(s"Sourc path:$source not exists!")
     } else {
@@ -203,17 +193,16 @@ class HdfsUtil(hdfsBasePath: String) {
     val destFile = getPath(destination)
 
     if (fs.exists(sourceFile)) {
-      val sourceDir = new FileStatus()
-      sourceDir.setPath(sourceFile)
       if (!fs.exists(destFile)) {
-        FileUtil.copy(fs, sourceDir, fs, destFile, deleteSourceFile, overWrite, fs.getConf)
+        mkDir(destination)
+        FileUtil.copy(fs, sourceFile, fs, destFile, deleteSourceFile, overWrite, fs.getConf)
       } else {
         if (fs.isDirectory(sourceFile) && fs.isFile(destFile)) {
           logger.error("can't copy a directory to a file!", new RuntimeException("can't copy a directory to a file!"))
         } else if (fs.isFile(sourceFile) && fs.isFile(destFile)) {
           logger.error(s"destination:$destination already exists!", new RuntimeException(s"destination:$destination already exists!"))
         } else {
-          FileUtil.copy(fs, sourceDir, fs, destFile, deleteSourceFile, overWrite, fs.getConf)
+          FileUtil.copy(fs, sourceFile, fs, destFile, deleteSourceFile, overWrite, fs.getConf)
         }
       }
     } else {
@@ -223,18 +212,32 @@ class HdfsUtil(hdfsBasePath: String) {
   }
 
   /**
-    * 获取HDFS地址
+    * 创建目录
     *
-    * @param path
+    * @param path 路径
     * @return
     */
-  def getPath(path: String): Path = {
-    //    if (path.toLowerCase().startsWith("hdfs://")) {
-    //      new Path(path)
-    //    } else {
-    //      new Path(hdfsBasePath + path)
-    //    }
-    new Path(path)
+  def mkDir(path: String): Unit = {
+    if (fs.exists(getPath(path))) {
+      if (fs.isDirectory(getPath(path))) {
+        logger.error(s"$path already exits")
+      } else {
+        logger.warn(s"already has a file named $path! but we created a directory.")
+        fs.mkdirs(getPath(path))
+      }
+    } else {
+      fs.mkdirs(getPath(path))
+    }
+  }
+
+  /**
+    * 地址是否存在
+    *
+    * @param path 路径
+    * @return
+    */
+  def exists(path: String): Boolean = {
+    fs.exists(getPath(path))
   }
 
   /**
@@ -294,7 +297,7 @@ class HdfsUtil(hdfsBasePath: String) {
     /**
       * 根据数字获取权限信息
       *
-      * @param p
+      * @param p 权限 1-7
       * @return
       */
     def getPermission(p: Int): FsAction = {
@@ -351,28 +354,9 @@ class HdfsUtil(hdfsBasePath: String) {
   }
 
   /**
-    * 创建目录
-    *
-    * @param path
-    * @return
-    */
-  def mkDir(path: String): Unit = {
-    if (fs.exists(getPath(path))) {
-      if (fs.isDirectory(getPath(path))) {
-        logger.error(s"$path already exits")
-      } else {
-        logger.warn(s"already has a file named $path! but we created a directory.")
-        fs.mkdirs(getPath(path))
-      }
-    } else {
-      fs.mkdirs(getPath(path))
-    }
-  }
-
-  /**
     * 创建文件
     *
-    * @param path
+    * @param path 路径
     * @return
     */
   def createFile(path: String): Unit = {
@@ -398,17 +382,60 @@ class HdfsUtil(hdfsBasePath: String) {
   }
 
   /**
-    * 地址是否存在
-    *
-    * @param path
-    * @return
+    * 关闭文件系统
     */
-  def exists(path: String): Boolean = {
-    fs.exists(getPath(path))
+  def close(): Unit = {
+    try {
+      fs.close()
+    } catch {
+      case e: Exception =>
+        logger.error(s"Can not close HDFS, reason:${e.getMessage}")
+    }
   }
 
-  def close: Unit = {
-    fs.close()
+  /**
+    * 删除目录
+    *
+    * @param paths 路径
+    */
+  private def deleteDir(paths: String*): Unit = {
+    paths.par.foreach { path =>
+      if (fs.exists(getPath(path)) && fs.isDirectory(getPath(path))) {
+        logger.info(s"try to delete $path")
+        val dirs = listDirs(path)
+        deleteDir(dirs: _*)
+        val files = listAllFiles(path, recursive = false)
+        deleteFile(files: _*)
+        fs.delete(getPath(path), true)
+      } else {
+        logger.error(s"$path is not a Dir or not exits")
+      }
+    }
+  }
+
+  /**
+    * 删除文件
+    *
+    * @param paths 路径
+    */
+  private def deleteFile(paths: String*): Unit = {
+    paths.par.foreach { path =>
+      if (fs.exists(getPath(path))) {
+        if (fs.isFile(getPath(path))) {
+          logger.info(s"try to delete $path")
+          val res = fs.delete(getPath(path), true)
+          if (res) {
+            logger.info(s"complete deleting $path")
+          } else {
+            logger.info(s"an error occurred during deleting $path")
+          }
+        } else {
+          logger.warn(s"$path is not a file! SKIP DELETE!")
+        }
+      } else {
+        logger.warn(s"$path not exits! SKIP DELETE!")
+      }
+    }
   }
 
 }
