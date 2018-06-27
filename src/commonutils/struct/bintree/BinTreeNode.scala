@@ -1,11 +1,12 @@
 package commonutils.struct.bintree
 
 import scala.collection.mutable
+import scala.util.control.Breaks
 
 /**
   * Created by Namhwik on 2018/6/25.
   */
-case class BinTreeNode(var element: Any, var parent: BinTreePosition = null, asLChild: Boolean = false,
+case class BinTreeNode(var element: ElementTrait, var parent: BinTreePosition = null, asLChild: Boolean = false,
                        var lChild: BinTreePosition = null, var rChild: BinTreePosition = null)
   extends BinTreePosition {
 
@@ -13,6 +14,7 @@ case class BinTreeNode(var element: Any, var parent: BinTreePosition = null, asL
   protected var height: Int = 0 //高度
   protected var depth: Int = 0 //深度
 
+  override def isEmpty: Boolean = size < 2
 
   override def hasParent: Boolean = parent != null
 
@@ -30,6 +32,7 @@ case class BinTreeNode(var element: Any, var parent: BinTreePosition = null, asL
 
   override def setLChild(c: BinTreePosition): Unit = lChild = c
 
+
   override def isRChild: Boolean = !asLChild
 
   override def hasRChild: Boolean = rChild != null
@@ -37,6 +40,7 @@ case class BinTreeNode(var element: Any, var parent: BinTreePosition = null, asL
   override def getRChild: BinTreePosition = rChild
 
   override def setRChild(c: BinTreePosition): Unit = rChild = c
+
 
   override def getSize: Int = size
 
@@ -170,7 +174,7 @@ case class BinTreeNode(var element: Any, var parent: BinTreePosition = null, asL
 
   override def getElem: Any = element
 
-  override def setElem(element: Any): Unit = this.element=element
+  override def setElem(element: Any): Unit = this.element = element
 
 
   //在v的后代中，找出最小者
@@ -231,4 +235,80 @@ case class BinTreeNode(var element: Any, var parent: BinTreePosition = null, asL
     }
   }
 
+  //二分查找
+  def binSearch(k: BinTreePosition, v: Any): BinTreePosition = {
+    var node = k
+    import scala.util.control.Breaks._
+    breakable {
+      while (true) {
+        if (node.getElem.compareTo(v) < 0) {
+          if (node.hasLChild)
+            node = node.getLChild
+          else
+            break
+        } else if (node.getElem.compareTo(v) > 0) {
+          if (node.hasRChild)
+            node = node.getRChild
+          else
+            break
+        }
+        else
+          break
+      }
+    }
+    node
+  }
+
+  //插入节点
+  def insert(root: BinTreePosition, elem: ElementTrait): BinTreePosition = {
+    if (root.isEmpty) {
+      if (root.getElem.compareTo(elem) > 0)
+        root.attachR(BinTreeNode(elem, this))
+      else
+        root.attachL(BinTreeNode(elem, this, asLChild = true))
+    } else {
+      var node = root
+      while (true) {
+        val nearestNode = binSearch(node, elem.value)
+        nearestNode.getElem.compareTo(elem) match {
+          case 1 => node.attachL(BinTreeNode(elem, nearestNode, asLChild = true))
+          case -1 => node.attachR(BinTreeNode(elem, node))
+          case 0 => if (!node.hasLChild)
+            node.attachL(BinTreeNode(elem, node, asLChild = true))
+          else if (!node.hasRChild)
+            node.attachR(BinTreeNode(elem, node))
+          else
+            node = node.getLChild
+          case _ => throw new RuntimeException("节点比较异常")
+        }
+      }
+    }
+    root
+  }
+
+  //删除节点
+  def remove(root: BinTreePosition, elem: ElementTrait): BinTreePosition = {
+    val nearNode = binSearch(root,elem.value)
+    if(nearNode.getElem.compareTo(elem)!=0)
+      null
+    else{
+      if(!nearNode.hasLChild){
+        nearNode.secede
+        if(nearNode.hasRChild)  nearNode.getParent.attachL(nearNode.getRChild)
+      }
+      else {
+        val preNode = nearNode.getPrev
+        swap(nearNode,preNode)
+        preNode.secede
+      }
+      root
+    }
+  }
+
+  //交换节点
+  def swap(a: BinTreePosition, b: BinTreePosition): Unit = {
+    val a_elem = a.getElem
+    a.setElem(b.getElem)
+    b.setElem(a_elem)
+  }
 }

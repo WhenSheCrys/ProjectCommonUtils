@@ -5,7 +5,7 @@ package commonutils.struct.bintree
   */
 class BinTree_LinkedList extends BinTree {
   private var root:BinTreePosition = _
-  override def getRoot(): BinTreePosition = root
+  //override def getRoot(): BinTreePosition = root
 
   override def isEmpty: Boolean = null==root
 
@@ -20,4 +20,6 @@ class BinTree_LinkedList extends BinTree {
   override def elementsPostorder: Iterator[BinTreePosition] = if(isEmpty) null else root.elementsPostorder
 
   override def elementsLevelorder: Iterator[BinTreePosition] = if(isEmpty) null else root.elementsLevelorder
+
+  override def getRoot(): Unit = ???
 }

@@ -5,7 +5,7 @@ package commonutils.struct.bintree
   */
 trait Position {
 
-  def getElem: Any
+  def getElem: ElementTrait
 
-  def setElem(element: Any): Unit
+  def setElem(element: ElementTrait): Unit
 }

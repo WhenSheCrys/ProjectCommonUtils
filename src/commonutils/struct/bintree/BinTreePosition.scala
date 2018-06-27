@@ -45,6 +45,9 @@ trait BinTreePosition extends Position {
   //返回当前节点后代元素的数目
   def getSize: Int
 
+  //是否为空
+  def isEmpty:Boolean
+
   //在孩子发生变化后，更新当前节点及其祖先的规模
   def updateSize(): Unit
 
