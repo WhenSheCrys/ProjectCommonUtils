@@ -1,4 +1,4 @@
-package commonutils.bigdata
+package com.nam.bigdata
 import java.net.URI
 
 import org.apache.hadoop.conf.Configuration

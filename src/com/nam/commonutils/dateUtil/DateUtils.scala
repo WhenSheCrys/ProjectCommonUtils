@@ -1,4 +1,4 @@
-package commonutils.dateUtil
+package com.nam.commonutils.dateUtil
 
 
 import java.text.{ParseException, SimpleDateFormat}

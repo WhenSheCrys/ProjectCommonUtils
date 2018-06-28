@@ -1,7 +1,7 @@
-package commonutils.struct.bintree
+package com.nam.struct.bintree
 
 import scala.collection.mutable
-import scala.util.control.Breaks
+import scala.util.control.Breaks._
 
 /**
   * Created by Namhwik on 2018/6/25.
@@ -172,9 +172,9 @@ case class BinTreeNode(var element: ElementTrait, var parent: BinTreePosition = 
     list.toIterator
   }
 
-  override def getElem: Any = element
+  override def getElem: ElementTrait = element
 
-  override def setElem(element: Any): Unit = this.element = element
+  override def setElem(element: ElementTrait): Unit = this.element = element
 
 
   //在v的后代中，找出最小者
@@ -236,9 +236,8 @@ case class BinTreeNode(var element: ElementTrait, var parent: BinTreePosition = 
   }
 
   //二分查找
-  def binSearch(k: BinTreePosition, v: Any): BinTreePosition = {
+  def binSearch(k: BinTreePosition, v: ElementTrait): BinTreePosition = {
     var node = k
-    import scala.util.control.Breaks._
     breakable {
       while (true) {
         if (node.getElem.compareTo(v) < 0) {
@@ -269,7 +268,7 @@ case class BinTreeNode(var element: ElementTrait, var parent: BinTreePosition = 
     } else {
       var node = root
       while (true) {
-        val nearestNode = binSearch(node, elem.value)
+        val nearestNode = binSearch(node, elem)
         nearestNode.getElem.compareTo(elem) match {
           case 1 => node.attachL(BinTreeNode(elem, nearestNode, asLChild = true))
           case -1 => node.attachR(BinTreeNode(elem, node))
@@ -288,17 +287,17 @@ case class BinTreeNode(var element: ElementTrait, var parent: BinTreePosition = 
 
   //删除节点
   def remove(root: BinTreePosition, elem: ElementTrait): BinTreePosition = {
-    val nearNode = binSearch(root,elem.value)
-    if(nearNode.getElem.compareTo(elem)!=0)
+    val nearNode = binSearch(root, elem)
+    if (nearNode.getElem.compareTo(elem) != 0)
       null
-    else{
-      if(!nearNode.hasLChild){
+    else {
+      if (!nearNode.hasLChild) {
         nearNode.secede
-        if(nearNode.hasRChild)  nearNode.getParent.attachL(nearNode.getRChild)
+        if (nearNode.hasRChild) nearNode.getParent.attachL(nearNode.getRChild)
       }
       else {
         val preNode = nearNode.getPrev
-        swap(nearNode,preNode)
+        swap(nearNode, preNode)
         preNode.secede
       }
       root
@@ -311,4 +310,125 @@ case class BinTreeNode(var element: ElementTrait, var parent: BinTreePosition = 
     a.setElem(b.getElem)
     b.setElem(a_elem)
   }
+
+
+  def rebance(root: BinTreePosition, z: BinTreePosition): BinTreePosition = {
+    if (z == null) root
+    else {
+      var node = z
+      breakable {
+        while (true) {
+          if (!isBalanced(node)) rorate(node)
+          if (!node.hasParent) break
+          node = node.getParent
+        }
+      }
+      node
+    }
+  }
+
+  //判断节点v是否平衡
+  protected def isBalanced(v: BinTreePosition): Boolean = {
+    if (null == v) return true
+    val lH = if (v.hasLChild) v.getLChild.getHeight else -1
+    val rH = if (v.hasRChild) v.getRChild.getHeight else -1
+    val deltaH = lH - rH
+    (-1 <= deltaH) && (deltaH <= 1)
+  }
+
+
+  //通过旋转，使节点z的平衡因子的绝对值不超过1(支持AVL树) //返回新的子树根
+  def rorate(z: BinTreePosition): BinTreePosition = {
+    val y = tallerChild(z)
+    val x = tallerChild(y)
+    val cType = z.isLChild
+    val p = z.getParent //p为z的父亲
+    var a, b, c: BinTreePosition = null //自左向右，三个节点
+    var t0, t1, t2, t3: BinTreePosition = null //自左向右，四棵子树
+    /** ****** 以下分四种情况 ********/
+    if (y.isLChild) {
+      //若y是左孩子，则
+      c = z
+      t3 = z.getRChild
+      if (x.isLChild) {
+        //若x是左孩子
+        b = y
+        t2 = y.getRChild
+        a = x
+        t1 = x.getRChild
+        t0 = x.getLChild
+      } else {
+        //若x是右孩子
+        a = y
+        t0 = y.getLChild
+        b = x
+        t1 = x.getLChild
+        t2 = x.getRChild
+      }
+    } else {
+      //若y是右孩子，则
+      a = z
+      t0 = z.getLChild
+      if (x.isRChild) {
+        //若x是右孩子
+        b = y
+        t1 = y.getLChild
+        c = x
+        t2 = x.getLChild
+        t3 = x.getRChild
+      } else {
+        //若x是左孩子
+        c = y
+        t3 = y.getRChild
+        b = x
+        t1 = x.getLChild
+        t2 = x.getRChild
+      }
+    }
+
+    //摘下三个节点
+    z.secede
+    y.secede
+    x.secede
+    //摘下四棵子树
+    if (null != t0) t0.secede
+    if (null != t1) t1.secede
+    if (null != t2) t2.secede
+    if (null != t3) t3.secede
+    //重新链接
+    a.attachL(t0)
+    a.attachR(t1)
+    b.attachL(a)
+    c.attachL(t2)
+    c.attachR(t3)
+    // 子树重新接入原树
+    if (null != p)
+      if (cType) p.attachL(b) else p.attachR(b)
+    b
+  }
+
+  //返回节点p的孩子中的更高者
+  protected def tallerChild(v: BinTreePosition): BinTreePosition = {
+    val lH = if (v.hasLChild) v.getLChild.getHeight
+    else -1
+    val rH = if (v.hasRChild) v.getRChild.getHeight
+    else -1
+    if (lH > rH) return v.getLChild
+    if (lH < rH) return v.getRChild
+    if (v.isLChild) v.getLChild
+    else v.getRChild
+  }
+
+  // 返回节点p的孩子中的更矮者
+  protected def shorterChild(v: BinTreePosition): BinTreePosition = {
+    val lH = if (v.hasLChild) v.getLChild.getHeight
+    else -1
+    val rH = if (v.hasRChild) v.getRChild.getHeight
+    else -1
+    if (lH > rH) return v.getRChild
+    if (lH < rH) return v.getLChild
+    if (v.isLChild) v.getRChild
+    else v.getLChild
+  }
+
 }

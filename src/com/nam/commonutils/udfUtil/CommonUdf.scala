@@ -1,4 +1,4 @@
-package commonutils.udfUtil
+package com.nam.commonutils.udfUtil
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat

@@ -1,4 +1,4 @@
-package commonutils.struct.bintree
+package com.nam.struct.bintree
 
 /**
   * Created by Namhwik on 2018/6/26.

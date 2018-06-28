@@ -1,4 +1,4 @@
-package commonutils.struct.bintree
+package com.nam.struct.bintree
 
 /**
   * 二叉树抽象数据类型及其实现
