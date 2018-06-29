@@ -344,7 +344,7 @@ class HdfsUtil(hdfsBasePath: String) {
     require(mod.length > 0 && mod.length <= 3, s"Invalid permission number, required 3 but found ${mod.length}!")
     mod.foreach { x =>
       val c = x.toInt
-      require(c >= 48 && c <= 55, s"Invalid permisson at number $x")
+      require(c >= 48 && c <= 55, s"Invalid permission at number $x")
     }
     val arr = mod.split("")
     val u = arr(0).toInt

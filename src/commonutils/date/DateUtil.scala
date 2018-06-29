@@ -4,8 +4,9 @@ import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date, TimeZone}
 
-import com.haiyisoft.xsjs.utils.DateUtil.DateType._
-import com.haiyisoft.xsjs.utils.DateUtil.TimeUnit.TimeUnit
+import commonutils.date.CommonType.CommonType
+import commonutils.date.StatisticsType.StatisticsType
+import commonutils.date.TimeUnit.TimeUnit
 import org.apache.log4j.Logger
 
 object DateUtil extends Serializable {
@@ -19,7 +20,7 @@ object DateUtil extends Serializable {
     * @param dateType
     * @return
     */
-  def get(date: Date, dateType: DateType.StatisticsType.Value): Long = {
+  def get(date: Date, dateType: StatisticsType): Long = {
     val cal = Calendar.getInstance()
     cal.setTime(date)
 
@@ -127,7 +128,7 @@ object DateUtil extends Serializable {
     * @param dateType
     * @return
     */
-  def get(date: Date, dateType: CommonType.Value): Date = {
+  def get(date: Date, dateType: CommonType): Date = {
 
     val cal = Calendar.getInstance()
     cal.setTime(date)
@@ -358,7 +359,7 @@ object DateUtil extends Serializable {
     timestamp1.compareTo(timestamp2)
   }
 
-  def compare(calendar1: Calendar,calendar2: Calendar):Int = {
+  def compare(calendar1: Calendar, calendar2: Calendar): Int = {
     calendar1.compareTo(calendar2)
   }
 
@@ -451,52 +452,6 @@ object DateUtil extends Serializable {
   def isSameLocalTime(cal1: Calendar, cal2: Calendar): Boolean = {
     if (cal1 == null || cal2 == null) throw new IllegalArgumentException("The date must not be null")
     cal1.get(Calendar.MILLISECOND) == cal2.get(Calendar.MILLISECOND) && cal1.get(Calendar.SECOND) == cal2.get(Calendar.SECOND) && cal1.get(Calendar.MINUTE) == cal2.get(Calendar.MINUTE) && cal1.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) && (cal1.getClass eq cal2.getClass)
-  }
-
-
-  /** **************************** 时间单位枚举类 ******************************/
-  
-  object TimeUnit extends Enumeration {
-
-    type TimeUnit = TimeUnit.Value
-
-    val MILLISECONDS = Value(0, "MILLISECONDS")
-    val SECONDS = Value(1, "SECONDS")
-    val MINUTES = Value(2, "MINUTES")
-    val HOURS = Value(3, "HOURS")
-    val DAYS = Value(4, "DAYS")
-    val WEEKS = Value(5, "WEEKS")
-    val MONTHS = Value(6, "MONTHS")
-    val YEARS = Value(7, "YEARS")
-  }
-
-  object DateType {
-
-    object CommonType extends Enumeration {
-
-      type CommonType = CommonType.Value
-
-      val
-      FIRST_DAY_OF_WEEK, FIRST_DAY_OF_MONTH, FIRST_DAY_OF_QUARTER, FIRST_DAY_OF_YEAR,
-      LAST_DAY_OF_WEEK, LAST_DAY_OF_MONTH, LAST_DAY_OF_QUARTER, LAST_DAY_OF_YEAR,
-      START_TIME_OF_DAY, START_TIME_OF_WEEK, START_TIME_OF_MONTH, START_TIME_OF_QUARTER, START_TIME_OF_YEAR,
-      END_TIME_OF_DAY, END_TIME_OF_WEEK, END_TIME_OF_MONTH, END_TIME_OF_QUARTER, END_TIME_OF_YEAR = Value
-
-    }
-
-    object StatisticsType extends Enumeration {
-
-      type StatisticsType = StatisticsType.Value
-
-      val TOTAL_DAYS_OF_MONTH, TOTAL_DAYS_OF_QUARTER, TOTAL_DAYS_OF_YEAR = Value
-      val
-      DAY_OF_WEEK, DAY_OF_MONTH, DAY_OF_YEAR, DAY_OF_QUARTER,
-      WEEK_OF_MONTH, WEEK_OF_QUARTER, WEEK_OF_YEAR,
-      MONTH_OF_QUARTER, MONTH_OF_YEAR,
-      QUARTER_OF_YEAR,
-      YEAR, HOUR, MINUTE, SECOND, MILLISECOND = Value
-    }
-
   }
 
 }
