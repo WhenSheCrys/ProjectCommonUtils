@@ -17,26 +17,26 @@ public class UnitUtil {
         static final String[] prefix = {"K", "M", "G", "T", "P", "E", "Z", "Y"};
 
         public static Long fromText(String text) {
-            Pattern pattern = Pattern.compile("(\\d+)([KkMmGgTtPpEeZzYy]?)([Bb]?)");
+            Pattern pattern = Pattern.compile("^(\\d+\\.?\\d+?)([KkMmGgTtPpEeZzYy]?)([Bb]?)$");
             Matcher matcher = pattern.matcher(text);
             if (matcher.matches()) {
                 String numString = matcher.group(1);
                 String unitString1 = matcher.group(2);
                 String unitString2 = matcher.group(3).equals("b") ? "b" : "B";
-                long u = Long.valueOf(numString);
-                long r = u;
+                double u = Double.valueOf(numString);
+                long r = (long) u;
 
                 if (!unitString1.equals("")) {
                     for (int i = 1; i <= prefix.length; i++) {
                         if (!unitString1.toUpperCase().equals(prefix[i - 1])) {
-                            r = u * (1L << ((long) i * 10L));
+                            r = (long) (u * (1L << ((long) (i + 1) * 10L)));
                         } else {
                             break;
                         }
                     }
                 }
                 if (unitString2.equals("b")) {
-                    r = (long) Math.ceil(r / 8D);
+                    r = (long) Math.ceil((double) r / 8D);
                 }
                 return r;
             } else {
