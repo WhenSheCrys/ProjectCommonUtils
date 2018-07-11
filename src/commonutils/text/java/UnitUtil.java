@@ -1,4 +1,4 @@
-package commonutils.text;
+package commonutils.text.java;
 
 import org.apache.log4j.Logger;
 

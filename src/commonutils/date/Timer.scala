@@ -1,7 +1,7 @@
 package commonutils.date
 
 import java.text.SimpleDateFormat
-import java.util.concurrent.{Executors, TimeUnit, ConcurrentHashMap => Map}
+import java.util.concurrent.{Executors, ConcurrentHashMap => Map, TimeUnit => JavaTimeUnit}
 import java.util.{Date, TimerTask, Timer => JavaTimer}
 
 import commonutils.date.Timer.TimerType.TimerType
@@ -82,14 +82,6 @@ object Timer {
     */
   protected[this] trait CustomTimer {
 
-    protected def getTimerTask(task: Runnable): TimerTask = {
-      new TimerTask {
-        override def run(): Unit = {
-          task.run()
-        }
-      }
-    }
-
     /**
       * 立即执行
       *
@@ -135,6 +127,14 @@ object Timer {
       * 停止执行
       */
     def shutdown(): Unit
+
+    protected def getTimerTask(task: Runnable): TimerTask = {
+      new TimerTask {
+        override def run(): Unit = {
+          task.run()
+        }
+      }
+    }
 
   }
 
@@ -223,20 +223,8 @@ object Timer {
 
     override def scheduleImmediately(task: Runnable): Unit = {
       try {
-        timer.schedule(task, 0L, TimeUnit.MILLISECONDS)
+        timer.schedule(task, 0L, JavaTimeUnit.MILLISECONDS)
         logger.info(s"timer:$name scheduled successfully!")
-      } catch {
-        case e: Exception =>
-          logger.error(s"Exception when schedule timer, reason:${e.getMessage}")
-          taskMap.remove(name)
-      }
-    }
-
-    override def scheduleWithDelay(task: Runnable, fixedDelay: Long): Unit = {
-      try {
-        val taskRunTime = sdf.format(new Date(System.currentTimeMillis() + fixedDelay))
-        timer.schedule(task, fixedDelay, TimeUnit.MILLISECONDS)
-        logger.info(s"timer:$name scheduled successfully! task will run at $taskRunTime")
       } catch {
         case e: Exception =>
           logger.error(s"Exception when schedule timer, reason:${e.getMessage}")
@@ -266,10 +254,10 @@ object Timer {
       }
     }
 
-    override def scheduleAtFixedRate(task: Runnable, delay: Long, period: Long): Unit = {
+    override def scheduleWithDelay(task: Runnable, fixedDelay: Long): Unit = {
       try {
-        val taskRunTime = sdf.format(new Date(System.currentTimeMillis() + delay))
-        timer.scheduleAtFixedRate(task, delay, period, TimeUnit.MICROSECONDS)
+        val taskRunTime = sdf.format(new Date(System.currentTimeMillis() + fixedDelay))
+        timer.schedule(task, fixedDelay, JavaTimeUnit.MILLISECONDS)
         logger.info(s"timer:$name scheduled successfully! task will run at $taskRunTime")
       } catch {
         case e: Exception =>
@@ -292,6 +280,18 @@ object Timer {
           scheduleAtFixedRate(task, delay, period)
           logger.info(s"timer:$name scheduled successfully! task will run at $taskRunTime")
         }
+      } catch {
+        case e: Exception =>
+          logger.error(s"Exception when schedule timer, reason:${e.getMessage}")
+          taskMap.remove(name)
+      }
+    }
+
+    override def scheduleAtFixedRate(task: Runnable, delay: Long, period: Long): Unit = {
+      try {
+        val taskRunTime = sdf.format(new Date(System.currentTimeMillis() + delay))
+        timer.scheduleAtFixedRate(task, delay, period, JavaTimeUnit.MICROSECONDS)
+        logger.info(s"timer:$name scheduled successfully! task will run at $taskRunTime")
       } catch {
         case e: Exception =>
           logger.error(s"Exception when schedule timer, reason:${e.getMessage}")
