@@ -49,7 +49,9 @@ public class UnitUtil {
             float r = (float) bytes;
             long unit = 1L << 10L;
             String result = r + "B";
-
+            if (human) {
+                return result;
+            }
             for (int i = 1; i <= prefix.length; i++) {
                 if (r >= unit) {
                     r = r / unit;
