@@ -13,11 +13,10 @@ object ConfUtil {
     def setFile(fileName: String): this.type = {
       this.fileName = fileName
       this
-
     }
 
-    def propertiesUtil(): this.type = {
-      this.tp = ConfType.Properties
+    def propertiesUtil(tp: ConfType.Value): this.type = {
+      this.tp = tp
       this
     }
 
@@ -33,7 +32,7 @@ object ConfUtil {
   }
 
   object ConfType extends Enumeration {
-    val Properties, Ini, Xml = Value
+    val Properties, Ini, json = Value
   }
 
 }

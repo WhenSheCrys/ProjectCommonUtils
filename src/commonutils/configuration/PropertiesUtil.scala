@@ -45,7 +45,12 @@ private[configuration] class PropertiesUtil(private val fileName: String = "conf
     * @return
     */
   def getOrElse(name: String, other: Any): Any = {
-    properties.getOrDefault(name, other)
+    Option(properties.get(name)).getOrElse(other)
+  }
+
+  override def load(fileName: String): this.type = {
+    getProperties(fileName)
+    this
   }
 
   /**
@@ -68,11 +73,6 @@ private[configuration] class PropertiesUtil(private val fileName: String = "conf
       properties
     }
 
-  }
-
-  override def load(fileName: String): this.type = {
-    getProperties(fileName)
-    this
   }
 
   /**
