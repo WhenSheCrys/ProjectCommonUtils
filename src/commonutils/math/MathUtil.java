@@ -15,36 +15,36 @@ public class MathUtil {
         return ArrayUtil.max(doubles);
     }
 
-    public double max(Integer... doubles) {
-        return ArrayUtil.max(doubles);
+    public int max(Integer... integers) {
+        return ArrayUtil.max(integers);
     }
 
-    public double min(Integer... doubles) {
-        return ArrayUtil.max(doubles);
+    public double min(Integer... integers) {
+        return ArrayUtil.max(integers);
     }
 
-    public double max(Short... doubles) {
-        return ArrayUtil.max(doubles);
+    public short max(Short... shorts) {
+        return ArrayUtil.max(shorts);
     }
 
-    public double min(Short... doubles) {
-        return ArrayUtil.max(doubles);
+    public short min(Short... shorts) {
+        return ArrayUtil.max(shorts);
     }
 
-    public double max(Float... doubles) {
-        return ArrayUtil.max(doubles);
+    public float max(Float... floats) {
+        return ArrayUtil.max(floats);
     }
 
-    public double min(Float... doubles) {
-        return ArrayUtil.max(doubles);
+    public float min(Float... floats) {
+        return ArrayUtil.max(floats);
     }
 
-    public double max(Byte... doubles) {
-        return ArrayUtil.max(doubles);
+    public byte max(Byte... bytes) {
+        return ArrayUtil.max(bytes);
     }
 
-    public double min(Byte... doubles) {
-        return ArrayUtil.max(doubles);
+    public byte min(Byte... bytes) {
+        return ArrayUtil.max(bytes);
     }
 
 }
