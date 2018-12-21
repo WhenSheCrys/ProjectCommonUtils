@@ -10,11 +10,11 @@ public class StringUtil {
         return isEmpty(input) || isEmpty(input.trim());
     }
 
-    public boolean isNotEmpty(String input) {
+    public static boolean isNotEmpty(String input) {
         return !isEmpty(input);
     }
 
-    public boolean isNotBlank(String input) {
+    public static boolean isNotBlank(String input) {
         return !isBlank(input);
     }
 

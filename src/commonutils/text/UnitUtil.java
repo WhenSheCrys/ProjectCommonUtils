@@ -26,7 +26,7 @@ public class UnitUtil {
                 if (!unitString1.equals("")) {
                     for (int i = 1; i <= prefix.length; i++) {
                         if (!unitString1.toUpperCase().equals(prefix[i - 1])) {
-                            r = (long) (u * (1L << ((long) (i + 1) * 10L)));
+                            r = (long) (u * (1L << (((long) (i + 1)) * 10L)));
                         } else {
                             break;
                         }

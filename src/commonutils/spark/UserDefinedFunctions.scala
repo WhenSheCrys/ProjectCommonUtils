@@ -7,7 +7,7 @@ import org.apache.spark.sql.expressions.UserDefinedFunction
 object UserDefinedFunctions {
 
   val string2Double: UserDefinedFunction = udf { input: String =>
-    if (StringUtil.isEmptyOrBlank(input)) {
+    if (StringUtil.isBlank(input)) {
       0D
     } else {
       try {

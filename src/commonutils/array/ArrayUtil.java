@@ -37,4 +37,19 @@ public class ArrayUtil {
         return maxMin;
     }
 
+    public static <T> String mkString(String separator, T... ts) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ts.length; i++) {
+            if (null != ts[i]) {
+                sb.append(ts[i]);
+            } else {
+                sb.append("null");
+            }
+            if (i == ts.length - 1) {
+                sb.append(separator);
+            }
+
+        }
+        return sb.toString();
+    }
 }
