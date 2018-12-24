@@ -1,5 +1,6 @@
 package commonutils.hadoop;
 
+import commonutils.text.Regex;
 import commonutils.text.StringUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
@@ -38,7 +39,7 @@ public class HdfsUtil {
 
     private void init() {
         assert url.startsWith("hdfs://") || url.startsWith("/");
-        Pattern pattern = Pattern.compile("^(hdfs)://(([\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3}.[\\d]{1,3})|([1-9a-zA-Z.]+)):([\\d]{1,5})");
+        Pattern pattern = Regex.HDFS_PATH_REGEX;
         Matcher matcher = pattern.matcher(url);
         if (matcher.matches()) {
             url = matcher.group(0);
@@ -108,7 +109,7 @@ public class HdfsUtil {
         if (!exists(path)) {
             return arrayList;
         }
-        list(path, fileFilter).forEach(x->{
+        list(path, fileFilter).forEach(x -> {
             if (isDirectory(x)) {
                 arrayList.addAll(listAll(x, fileFilter));
             }

@@ -1,6 +1,6 @@
-package commonutils
+package commonutils.date.util
 
-package object date {
+package object scala {
 
   /** **************************** 时间单位枚举类 ******************************/
 

@@ -28,8 +28,14 @@ public class DateUtil {
             case DAY:
                 transformCalendar(calendar, Calendar.DAY_OF_YEAR, mount);
                 break;
+            case WEEK:
+                transformCalendar(calendar, Calendar.WEEK_OF_YEAR, mount);
+                break;
             case MONTH:
                 transformCalendar(calendar, Calendar.MONTH, mount);
+                break;
+            case QUARTER:
+                transformCalendar(calendar, Calendar.MONTH, mount * 3);
                 break;
             case YEAR:
                 transformCalendar(calendar, Calendar.YEAR, mount);
@@ -47,14 +53,93 @@ public class DateUtil {
         calendar.set(field, calendar.get(field) + mount);
     }
 
-    public static int firstDayOfQuarter(Date date) {
-        Calendar calendar = getCalendar(date);
-        int quarter = inWhichQuarter(date);
-        int year = calendar.get(Calendar.YEAR);
-        return firstDayOfQuarter(year, quarter);
+    public static Date earliestDateOf(Date date, TimeUnit timeUnit) {
+        Date result = date;
+        Calendar calendar = getCalendar(result);
+        switch (timeUnit) {
+            case CENTURY:
+                int years = calendar.get(Calendar.YEAR) % 100;
+                result = transform(result, -years, TimeUnit.YEAR);
+                calendar = getCalendar(result);
+            case YEAR:
+                calendar.set(Calendar.MONTH, calendar.getActualMinimum(Calendar.MONTH));
+                result = calendar.getTime();
+            case QUARTER:
+                int month = firstMonthOfQuarter(inWhichQuarter(result));
+                calendar.set(Calendar.MONTH, month - 1);
+                result = calendar.getTime();
+            case MONTH:
+            case WEEK:
+                if (timeUnit == TimeUnit.WEEK) {
+                    calendar.set(Calendar.DAY_OF_WEEK, calendar.getActualMinimum(Calendar.DAY_OF_WEEK));
+                    result = calendar.getTime();
+                } else {
+                    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+                    result = calendar.getTime();
+                }
+            case DAY:
+                calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
+                result = calendar.getTime();
+            case HOUR:
+                calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
+                result = calendar.getTime();
+            case MINUTE:
+                calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
+                result = calendar.getTime();
+            case SECOND:
+                calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+                result = calendar.getTime();
+            case MILLISECOND:
+            default:
+                break;
+        }
+        return result;
     }
 
-    public static int firstDayOfQuarter(int year, int quarter) {
+    public static Date latestDateOf(Date date, TimeUnit timeUnit) {
+        Date result = date;
+        Calendar calendar = getCalendar(result);
+        switch (timeUnit) {
+            case CENTURY:
+                int years = calendar.get(Calendar.YEAR) % 100;
+                result = transform(result, 100 - years, TimeUnit.YEAR);
+                calendar = getCalendar(result);
+            case YEAR:
+                calendar.set(Calendar.MONTH, calendar.getActualMinimum(Calendar.MONTH));
+                result = calendar.getTime();
+            case QUARTER:
+                int month = lastMonthOfQuarter(inWhichQuarter(date));
+                calendar.set(Calendar.MONTH, month - 1);
+                result = calendar.getTime();
+            case MONTH:
+            case WEEK:
+                if (timeUnit == TimeUnit.WEEK) {
+                    calendar.set(Calendar.DAY_OF_WEEK, calendar.getActualMaximum(Calendar.DAY_OF_WEEK));
+                    result = calendar.getTime();
+                } else {
+                    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+                    result = calendar.getTime();
+                }
+            case DAY:
+                calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMaximum(Calendar.HOUR_OF_DAY));
+                result = calendar.getTime();
+            case HOUR:
+                calendar.set(Calendar.MINUTE, calendar.getActualMaximum(Calendar.MINUTE));
+                result = calendar.getTime();
+            case MINUTE:
+                calendar.set(Calendar.SECOND, calendar.getActualMaximum(Calendar.SECOND));
+                result = calendar.getTime();
+            case SECOND:
+                calendar.set(Calendar.MILLISECOND, calendar.getActualMaximum(Calendar.MILLISECOND));
+                result = calendar.getTime();
+            case MILLISECOND:
+            default:
+                break;
+        }
+        return result;
+    }
+
+    private static int firstDayOfQuarter(int year, int quarter) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, year);
         int firstMonthOfQuarter = firstMonthOfQuarter(quarter);
@@ -63,29 +148,13 @@ public class DateUtil {
         return calendar.get(Calendar.DAY_OF_YEAR);
     }
 
-    public static Date firstDateOfQuarter(Date date) {
-        int firstDayOfQuarter = firstDayOfQuarter(date);
-        Calendar calendar = getCalendar(date);
-        calendar.set(Calendar.DAY_OF_YEAR, firstDayOfQuarter);
-        setToStartTimeOfDay(calendar);
-        return calendar.getTime();
-    }
-
-    public static Date firstDateOfQuarter(int year, int quarter) {
-        int firstDayOfQuarter = firstDayOfQuarter(year, quarter);
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_YEAR, firstDayOfQuarter);
-        setToStartTimeOfDay(calendar);
-        return calendar.getTime();
-    }
-
-    public static int inWhichQuarter(Date date) {
+    private static int inWhichQuarter(Date date) {
         Calendar cal = getCalendar(date);
         int month = cal.get(Calendar.MONTH) + 1;
         return inWhichQuarter(month);
     }
 
-    public static int firstMonthOfQuarter(int quarter) {
+    private static int firstMonthOfQuarter(int quarter) {
         int month = 0;
         switch (quarter) {
             case 1:
@@ -106,7 +175,28 @@ public class DateUtil {
         return month;
     }
 
-    public static int inWhichQuarter(int month) {
+    private static int lastMonthOfQuarter(int quarter) {
+        int month = 0;
+        switch (quarter) {
+            case 1:
+                month = 3;
+                break;
+            case 2:
+                month = 6;
+                break;
+            case 3:
+                month = 9;
+                break;
+            case 4:
+                month = 12;
+                break;
+            default:
+                throw new RuntimeException("quarter should between 1 and 4!");
+        }
+        return month;
+    }
+
+    private static int inWhichQuarter(int month) {
         int quarter = 0;
         switch (month) {
             case 1:
@@ -135,6 +225,49 @@ public class DateUtil {
         return quarter;
     }
 
+    public static Date yesterday(Date date) {
+        return setToStartTimeOfDay(transform(date, -1, TimeUnit.DAY));
+
+    }
+
+    public static Date tomorrow(Date date) {
+        return setToStartTimeOfDay(transform(date, 1, TimeUnit.DAY));
+    }
+
+    public static int totalDaysBetween(Date start, Date end) {
+        return daysBetween(start, end).size();
+    }
+
+    public static int totalDaysBetween(Date start, Date end, boolean includeStart, boolean includeEnd) {
+        return daysBetween(start, end, includeStart, includeEnd).size();
+    }
+
+    public static ArrayList<Date> daysBetween(Date start, Date end) {
+        return daysBetween(start, end, false, false);
+    }
+
+    public static ArrayList<Date> daysBetween(Date start, Date end, boolean includeStart, boolean includeEnd) {
+        if (!includeStart) {
+            start = setToStartTimeOfDay(tomorrow(start));
+        }
+        if (!includeEnd) {
+            end = setToStartTimeOfDay(yesterday(end));
+        }
+        assert start.compareTo(end) <= 0 : "Start date must <= End date";
+        ArrayList<Date> arrayList = new ArrayList<>();
+        while (start.compareTo(end) <= 0) {
+            arrayList.add(start);
+            start = setToStartTimeOfDay(tomorrow(start));
+        }
+        return arrayList;
+    }
+
+    public static boolean isLeapYear(Date date) {
+        Calendar calendar = getCalendar(date);
+        int year = calendar.get(Calendar.YEAR);
+        return year % 4 == 0 && year % 100 != 0 || year % 400 == 0;
+    }
+
     private static Calendar getCalendar(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -146,6 +279,21 @@ public class DateUtil {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+    }
+
+    private static Date setToStartTimeOfDay(Date date) {
+        Calendar calendar = getCalendar(date);
+        setToStartTimeOfDay(calendar);
+        return calendar.getTime();
+    }
+
+    private static Date setToEndTimeOfDay(Date date) {
+        Calendar calendar = getCalendar(date);
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMaximum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.getActualMaximum(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.getActualMaximum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getActualMaximum(Calendar.MILLISECOND));
+        return calendar.getTime();
     }
 
 }
