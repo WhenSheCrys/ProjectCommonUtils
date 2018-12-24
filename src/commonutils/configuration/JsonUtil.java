@@ -2,7 +2,7 @@ package commonutils.configuration;
 
 import java.nio.charset.Charset;
 
-public class JsonUtil implements ConfigurationUtilInterface {
+public class JsonUtil implements ConfigurationUtil {
 
     private String fileName;
     private Charset charset = Charset.forName("UTF-8");
@@ -13,7 +13,7 @@ public class JsonUtil implements ConfigurationUtilInterface {
     }
 
     @Override
-    public ConfigurationUtilInterface load() {
+    public ConfigurationUtil load() {
         return null;
     }
 

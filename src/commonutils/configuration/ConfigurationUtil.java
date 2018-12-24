@@ -1,10 +1,8 @@
 package commonutils.configuration;
 
-import java.nio.charset.Charset;
+public interface ConfigurationUtil {
 
-public interface ConfigurationUtilInterface {
-
-    ConfigurationUtilInterface load();
+    ConfigurationUtil load();
 
     boolean contains(String name);
 

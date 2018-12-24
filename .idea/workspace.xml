@@ -2,16 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d88468b-ef78-4efa-92f0-f028e4a2df17" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/commonutils/date/util/scala/DateUtil.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/commonutils/date/util/scala/package.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commonutils/date/DateUtil.scala" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commonutils/date/package.scala" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commonutils/date/util/DateUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/commonutils/date/util/DateUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commonutils/date/util/TimeUnit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/commonutils/date/util/TimeUnit.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commonutils/hadoop/HdfsUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/commonutils/hadoop/HdfsUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/commonutils/text/Regex.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/commonutils/text/Regex.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectCommonUtils.iml" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectCommonUtils.iml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -22,44 +14,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/commonutils/hadoop/HdfsUtil.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="159">
-              <caret line="41" column="45" selection-start-line="41" selection-start-column="45" selection-end-line="41" selection-end-column="45" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#1917#1918#0" expanded="true" />
-                <element signature="e#1949#1950#0" expanded="true" />
-                <element signature="e#1999#2000#0" expanded="true" />
-                <element signature="e#2052#2053#0" expanded="true" />
-                <element signature="e#2107#2108#0" expanded="true" />
-                <element signature="e#2160#2161#0" expanded="true" />
-                <element signature="e#5667#5668#0" expanded="true" />
-                <element signature="e#5713#5714#0" expanded="true" />
-                <element signature="e#6785#6786#0" expanded="true" />
-                <element signature="e#6836#6837#0" expanded="true" />
-                <element signature="e#8362#8363#0" expanded="true" />
-                <element signature="e#8399#8400#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/commonutils/text/Regex.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="88">
-              <caret line="4" column="19" lean-forward="true" selection-start-line="4" selection-start-column="19" selection-end-line="4" selection-end-column="19" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/pom.xml">
+        <entry file="file://$PROJECT_DIR$/src/commonutils/text/StringUtil.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="52" column="21" selection-start-line="52" selection-start-column="21" selection-end-line="52" selection-end-column="21" />
+            <state relative-caret-position="242">
+              <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
             </state>
           </provider>
         </entry>
@@ -129,7 +88,6 @@
         <option value="$PROJECT_DIR$/src/commonutils/date/timer/TimerFactory.java" />
         <option value="$PROJECT_DIR$/src/commonutils/math/MathUtil.java" />
         <option value="$PROJECT_DIR$/src/commonutils/net/scriptFile.scala" />
-        <option value="$PROJECT_DIR$/src/commonutils/text/StringUtil.java" />
         <option value="$PROJECT_DIR$/src/commonutils/array/ArrayUtil.java" />
         <option value="$PROJECT_DIR$/src/commonutils/text/Path.java" />
         <option value="$PROJECT_DIR$/src/commonutils/text/PathUtil.java" />
@@ -149,6 +107,7 @@
         <option value="$PROJECT_DIR$/src/commonutils/hadoop/HdfsUtil.java" />
         <option value="$PROJECT_DIR$/src/commonutils/text/Regex.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/src/commonutils/text/StringUtil.java" />
       </list>
     </option>
   </component>
@@ -218,6 +177,14 @@
             </path>
             <path>
               <item name="ProjectCommonUtils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ProjectCommonUtils" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="commonutils" type="462c0819:PsiDirectoryNode" />
+              <item name="text" type="462c0819:PsiDirectoryNode" />
+              <item name="Regex" type="1a9f42e2:ClassTreeNode" />
+            </path>
+            <path>
+              <item name="ProjectCommonUtils" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
             </path>
             <path>
@@ -264,7 +231,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545621429832" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545631091957" />
     <property name="last.edited.regexp" value="hdfs://node1.com:8080" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../download/DEVELOP/hadoop-rel-release-3.1.1.zip!/" />
     <property name="project.structure.last.edited" value="Modules" />
@@ -338,18 +305,18 @@
       <workItem from="1545285849041" duration="20488000" />
       <workItem from="1545357619992" duration="12518000" />
       <workItem from="1545377120716" duration="14235000" />
-      <workItem from="1545612806049" duration="7596000" />
+      <workItem from="1545612806049" duration="10831000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="57187000" />
+    <option name="totallyTimeSpent" value="60422000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1080" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26602563" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2815171" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -358,7 +325,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32914045" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49893162" visible="true" weight="0.5010482" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49893162" weight="0.5010482" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39937106" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -366,7 +333,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
-      <window_info anchor="bottom" id="Terminal" order="10" weight="0.32914045" />
+      <window_info anchor="bottom" id="Terminal" order="10" visible="true" weight="0.32914045" />
       <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.50106835" side_tool="true" weight="0.687631" />
       <window_info anchor="bottom" id="Java Enterprise" order="12" />
       <window_info anchor="bottom" id="Messages" order="13" sideWeight="0.49946582" weight="0.32914045" />
@@ -606,13 +573,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/commonutils/text/StringUtil.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="16" column="18" selection-start-line="16" selection-start-column="18" selection-end-line="16" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///usr/lib/jvm/jdk1.8.0_191/src.zip!/java/util/Map.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="203">
@@ -816,6 +776,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="245">
+          <caret line="50" column="25" selection-start-line="50" selection-start-column="25" selection-end-line="50" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/commonutils/text/Regex.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="88">
@@ -823,10 +790,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
+    <entry file="file://$PROJECT_DIR$/src/commonutils/text/StringUtil.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="52" column="21" selection-start-line="52" selection-start-column="21" selection-end-line="52" selection-end-column="21" />
+        <state relative-caret-position="242">
+          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
         </state>
       </provider>
     </entry>

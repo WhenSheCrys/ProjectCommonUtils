@@ -4,14 +4,10 @@ import commonutils.text.StringUtil;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-public class PropertiesUtil implements ConfigurationUtilInterface {
+public class PropertiesUtil implements ConfigurationUtil {
     private String fileName;
     private Charset charset = Charset.forName("UTF-8");
     private Properties properties = new Properties();
@@ -27,7 +23,7 @@ public class PropertiesUtil implements ConfigurationUtilInterface {
         this.load();
     }
 
-    public ConfigurationUtilInterface load() {
+    public ConfigurationUtil load() {
         if (StringUtil.isBlank(fileName)) {
             throw new IllegalArgumentException("fileName should not be empty!");
         }

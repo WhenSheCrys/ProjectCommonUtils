@@ -30,8 +30,8 @@ public class ConfigUtilFactory {
             return this;
         }
 
-        public ConfigurationUtilInterface load() {
-            ConfigurationUtilInterface configurationUtilInterface = null;
+        public ConfigurationUtil load() {
+            ConfigurationUtil configurationUtilInterface = null;
             switch (this.configType) {
                 case INI:
                     break;
