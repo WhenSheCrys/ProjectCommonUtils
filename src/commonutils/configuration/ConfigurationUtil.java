@@ -2,8 +2,6 @@ package commonutils.configuration;
 
 public interface ConfigurationUtil {
 
-    ConfigurationUtil load();
-
     boolean contains(String name);
 
     int getAsInteger(String name);

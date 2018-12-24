@@ -62,60 +62,59 @@ public class HdfsUtil {
         this.user = user;
     }
 
-    public ArrayList<String> list(String path) {
+    public String[] list(String path) {
         return list(path, (Objects::nonNull));
     }
 
-    public ArrayList<String> listFiles(String path) {
+    public String[] listFiles(String path) {
         return list(path, FileStatus::isFile);
     }
 
-    public ArrayList<String> listDirs(String path) {
+    public String[] listDirs(String path) {
         return list(path, FileStatus::isDirectory);
     }
 
-    private ArrayList<String> list(String path, Predicate<FileStatus> fileFilter) {
+    private String[] list(String path, Predicate<FileStatus> fileFilter) {
         ArrayList<String> ret = new ArrayList<>();
-        if (!exists(path)) {
-            return ret;
+        if (exists(path)) {
+            if (isFile(path)) {
+                ret.add(getPath(path).toUri().getRawPath());
+                return ret.toArray(new String[0]);
+            } else {
+                try {
+                    ret.addAll(Arrays.stream(fs.listStatus(getPath(path))).parallel().filter(fileFilter)
+                            .map(x -> x.getPath().toUri().getRawPath()).collect(Collectors.toCollection(ArrayList::new)));
+                } catch (IOException e) {
+                    logger.error("Error when get file list!", e);
+                }
+            }
         }
-        if (isFile(path)) {
-            ret.add(getPath(path).toUri().getRawPath());
-            return ret;
-        }
-        try {
-            return new ArrayList<>(Arrays.asList(fs.listStatus(getPath(path)))).stream().parallel().filter(fileFilter)
-                    .map(x -> x.getPath().toUri().getRawPath()).collect(Collectors.toCollection(ArrayList::new));
-        } catch (IOException e) {
-            logger.error("Error when get file list!", e);
-        }
-        return ret;
+        return ret.toArray(new String[0]);
     }
 
-    public ArrayList<String> listAll(String path) {
+    public String[] listAll(String path) {
         return listAll(path, Objects::nonNull);
     }
 
-    public ArrayList<String> listAllFiles(String path) {
+    public String[] listAllFiles(String path) {
         return listAll(path, FileStatus::isFile);
     }
 
-    public ArrayList<String> listAllDirs(String path) {
+    public String[] listAllDirs(String path) {
         return listAll(path, FileStatus::isDirectory);
     }
 
-    private ArrayList<String> listAll(String path, Predicate<FileStatus> fileFilter) {
+    private String[] listAll(String path, Predicate<FileStatus> fileFilter) {
         ArrayList<String> arrayList = new ArrayList<>();
-        if (!exists(path)) {
-            return arrayList;
-        }
-        list(path, fileFilter).forEach(x -> {
-            if (isDirectory(x)) {
-                arrayList.addAll(listAll(x, fileFilter));
+        if (exists(path)) {
+            for (String x : list(path, fileFilter)) {
+                if (isDirectory(x)) {
+                    arrayList.addAll(Arrays.asList(listAll(x, fileFilter)));
+                }
+                arrayList.add(x);
             }
-            arrayList.add(x);
-        });
-        return arrayList;
+        }
+        return arrayList.toArray(new String[0]);
     }
 
     public boolean delete(String... path) {

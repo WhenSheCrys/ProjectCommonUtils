@@ -12,9 +12,8 @@ public class JsonUtil implements ConfigurationUtil {
         this.charset = charset;
     }
 
-    @Override
-    public ConfigurationUtil load() {
-        return null;
+    public void load() {
+
     }
 
     @Override

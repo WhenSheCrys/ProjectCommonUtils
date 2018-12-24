@@ -23,7 +23,7 @@ public class PropertiesUtil implements ConfigurationUtil {
         this.load();
     }
 
-    public ConfigurationUtil load() {
+    private void load() {
         if (StringUtil.isBlank(fileName)) {
             throw new IllegalArgumentException("fileName should not be empty!");
         }
@@ -45,7 +45,6 @@ public class PropertiesUtil implements ConfigurationUtil {
                 throw new RuntimeException(e);
             }
         }
-        return this;
     }
 
     public boolean contains(String name) {

@@ -45,7 +45,7 @@ public class ArrayUtil {
             } else {
                 sb.append("null");
             }
-            if (i == ts.length - 1) {
+            if (i != ts.length - 1) {
                 sb.append(separator);
             }
 
