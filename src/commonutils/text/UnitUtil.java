@@ -11,22 +11,22 @@ public class UnitUtil {
 
     public static class ByteUtil {
 
-        static final String[] prefix = {"K", "M", "G", "T", "P", "E", "Z", "Y"};
+        static final String[] prefix = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y", "B"};
 
         public static Long fromText(String text) {
-            Pattern pattern = Pattern.compile("^(\\d+\\.?\\d+?)([KkMmGgTtPpEeZzYy]?)([Bb]?)$");
+            Pattern pattern = Pattern.compile("^(\\d*\\.?\\d+?)([BbKkMmGgTtPpEeZzYy]?)([Bb]?)$");
             Matcher matcher = pattern.matcher(text);
             if (matcher.matches()) {
                 String numString = matcher.group(1);
-                String unitString1 = matcher.group(2);
+                String unitString1 = matcher.group(2).toUpperCase();
                 String unitString2 = matcher.group(3).equals("b") ? "b" : "B";
                 double u = Double.valueOf(numString);
                 long r = (long) u;
 
                 if (!unitString1.equals("")) {
-                    for (int i = 1; i <= prefix.length; i++) {
-                        if (!unitString1.toUpperCase().equals(prefix[i - 1])) {
-                            r = (long) (u * (1L << (((long) (i + 1)) * 10L)));
+                    for (String p : prefix) {
+                        if (!unitString1.equals(p)) {
+                            r *= 1024;
                         } else {
                             break;
                         }
@@ -41,23 +41,19 @@ public class UnitUtil {
             }
         }
 
-        static String toString(long bytes, boolean human) {
-
+        public static String toString(long bytes, boolean human) {
             float r = (float) bytes;
-            long unit = 1L << 10L;
+            long unit = 1024L;
             String result = r + "B";
-            if (human) {
+            if (!human) {
                 return result;
             }
-            for (int i = 1; i <= prefix.length; i++) {
-                if (r >= unit) {
-                    r = r / unit;
-                } else {
-                    result = r + prefix[i - 1] + "B";
-                    break;
-                }
+            int index = 0;
+            while (r >= unit && index < prefix.length) {
+                r /= unit;
+                index++;
             }
-            return result;
+            return r + prefix[index];
         }
 
         public static String toString(long bytes) {

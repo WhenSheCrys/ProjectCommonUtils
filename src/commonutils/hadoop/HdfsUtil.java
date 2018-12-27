@@ -2,8 +2,12 @@ package commonutils.hadoop;
 
 import commonutils.text.Regex;
 import commonutils.text.StringUtil;
+import commonutils.text.UnitUtil;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -77,10 +81,7 @@ public class HdfsUtil {
     private String[] list(String path, Predicate<FileStatus> fileFilter) {
         ArrayList<String> ret = new ArrayList<>();
         if (exists(path)) {
-            if (isFile(path)) {
-                ret.add(getPath(path).toUri().getRawPath());
-                return ret.toArray(new String[0]);
-            } else {
+            if (isDirectory(path)) {
                 try {
                     ret.addAll(Arrays.stream(fs.listStatus(getPath(path))).parallel().filter(fileFilter)
                             .map(x -> x.getPath().toUri().getRawPath()).collect(Collectors.toCollection(ArrayList::new)));
@@ -93,28 +94,37 @@ public class HdfsUtil {
     }
 
     public String[] listAll(String path) {
-        return listAll(path, Objects::nonNull);
+        ArrayList<String> ret = new ArrayList<>();
+        for (String s : list(path)) {
+            ret.add(s);
+            if (isDirectory(s)) {
+                ret.addAll(Arrays.asList(listAll(s)));
+            }
+        }
+        return ret.toArray(new String[0]);
     }
 
     public String[] listAllFiles(String path) {
-        return listAll(path, FileStatus::isFile);
+        ArrayList<String> ret = new ArrayList<>();
+        for (String s : list(path)) {
+            if (isFile(s)) {
+                ret.add(s);
+            } else {
+                ret.addAll(Arrays.asList(listAllFiles(s)));
+            }
+        }
+        return ret.toArray(new String[0]);
     }
 
     public String[] listAllDirs(String path) {
-        return listAll(path, FileStatus::isDirectory);
-    }
-
-    private String[] listAll(String path, Predicate<FileStatus> fileFilter) {
-        ArrayList<String> arrayList = new ArrayList<>();
-        if (exists(path)) {
-            for (String x : list(path, fileFilter)) {
-                if (isDirectory(x)) {
-                    arrayList.addAll(Arrays.asList(listAll(x, fileFilter)));
-                }
-                arrayList.add(x);
+        ArrayList<String> ret = new ArrayList<>();
+        for (String s : list(path)) {
+            if (isDirectory(s)) {
+                ret.add(s);
+                ret.addAll(Arrays.asList(listAllDirs(s)));
             }
         }
-        return arrayList.toArray(new String[0]);
+        return ret.toArray(new String[0]);
     }
 
     public boolean delete(String... path) {
@@ -273,6 +283,24 @@ public class HdfsUtil {
 
     private Path getPath(String path) {
         return new Path(path);
+    }
+
+    public long getSize(String path) {
+        return getFileStatus(path).getLen();
+    }
+
+    public String getTotalSizeAsHumanReadable(String... paths) {
+        long totalSize = 0L;
+        for (String path : paths) {
+            if (isFile(path)) {
+                totalSize += getSize(path);
+            } else {
+                for (String s : listAllFiles(path)) {
+                    totalSize += getSize(s);
+                }
+            }
+        }
+        return UnitUtil.ByteUtil.toString(totalSize, true);
     }
 
 }
