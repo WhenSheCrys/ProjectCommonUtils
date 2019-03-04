@@ -1,5 +1,6 @@
+package scala.org.zodiac.date
 
-package object date {
+object TimeEnum {
 
   /** **************************** 时间单位枚举类 ******************************/
 
@@ -40,6 +41,5 @@ package object date {
     QUARTER_OF_YEAR,
     YEAR, HOUR, MINUTE, SECOND, MILLISECOND = Value
   }
-
 
 }

@@ -4,11 +4,12 @@ import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date, TimeZone}
 
-import date.CommonType.CommonType
-import date.{CommonType, StatisticsType, TimeUnit}
-import date.StatisticsType.StatisticsType
-import date.TimeUnit.TimeUnit
 import org.apache.log4j.Logger
+
+import scala.org.zodiac.date.TimeEnum.CommonType.CommonType
+import scala.org.zodiac.date.TimeEnum.StatisticsType.StatisticsType
+import scala.org.zodiac.date.TimeEnum.TimeUnit.TimeUnit
+import scala.org.zodiac.date.TimeEnum.{CommonType, StatisticsType, TimeUnit}
 
 object DateUtil extends Serializable {
 
@@ -62,7 +63,7 @@ object DateUtil extends Serializable {
 
     def monthOfQuarter = {
       val month = cal.get(Calendar.MONTH) + 1
-      val firstMonthOfQuater = if (month >= 1 && month <= 3) {
+      val firstMonthOfQuarter = if (month >= 1 && month <= 3) {
         0
       } else if (month >= 4 && month <= 6) {
         3
@@ -73,7 +74,7 @@ object DateUtil extends Serializable {
       }
       val cal2 = Calendar.getInstance()
       cal2.setTime(date)
-      cal2.set(Calendar.MONTH, firstMonthOfQuater)
+      cal2.set(Calendar.MONTH, firstMonthOfQuarter)
       cal.get(Calendar.MONTH) - cal2.get(Calendar.MONTH)
     }
 
@@ -426,14 +427,14 @@ object DateUtil extends Serializable {
     c
   }
 
+  def toDate(unixTime: Long): Date = {
+    new Date(unixTime)
+  }
+
   def toCalendar(millisecond: Long, tz: TimeZone): Calendar = {
     val c = Calendar.getInstance(tz)
     c.setTime(toDate(millisecond))
     c
-  }
-
-  def toDate(unixTime: Long): Date = {
-    new Date(unixTime)
   }
 
   def isSameDay(date1: Date, date2: Date): Boolean = {
