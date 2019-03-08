@@ -1,11 +1,11 @@
 package scala.com.nam.bigdata
 
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.encoders.RowEncoder
-import org.apache.spark.{HashPartitioner, Partitioner}
-import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql._
+import org.apache.spark.sql.catalyst.encoders.RowEncoder
+import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.{HashPartitioner, Partitioner}
 
 /**
   * Created by Namhwik on 2018/6/29.
@@ -40,7 +40,7 @@ object JoinUtil {
 
     val leftColsSize = left.columns.length
     val rightColsSize = right.columns.length
-    val schema = StructType(left.schema.toArray ++ right.schema.toArray)
+    val schema = StructType(left.schema.toArray ++: right.schema.toArray)
 
     val rdds =
       Array(left, right).zipWithIndex.par
