@@ -62,10 +62,12 @@ public class EncryptedClassLoader extends ClassLoader {
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         Class c = null;
+        //search from already loaded classes
         c = findLoadedClass(name);
         if (null != c) {
             return c;
         }
+        //try to load custom class
         if (name.startsWith(prefix) && !name.endsWith(this.getClass().getSimpleName())) {
             try {
                 String path = name.replaceAll("\\.", "/") + ".class";
@@ -100,9 +102,11 @@ public class EncryptedClassLoader extends ClassLoader {
                 e.printStackTrace();
             }
         } else {
+            //search from System classes
             c = findSystemClass(name);
         }
         if (null == c) {
+            //if class still not found, use parent's method
             c = super.loadClass(name, resolve);
         }
         if (resolve && null != c) {
