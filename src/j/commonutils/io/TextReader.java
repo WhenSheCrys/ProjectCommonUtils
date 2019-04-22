@@ -10,10 +10,25 @@ import java.util.Scanner;
 
 public class TextReader {
 
+    /**
+     * 读取前20行
+     *
+     * @param file    文件
+     * @param charset 编码
+     * @return {@link java.util.ArrayList<String>}
+     */
     public static ArrayList<String> top(File file, Charset charset) {
         return top(file, charset, 20);
     }
 
+    /**
+     * 读取前N行
+     *
+     * @param file    文件
+     * @param charset 编码
+     * @param n       行数
+     * @return {@link java.util.ArrayList<String>}
+     */
     public static ArrayList<String> top(File file, Charset charset, int n) {
         ArrayList<String> arrayList = new ArrayList<>();
         if (n < 1) {
@@ -42,7 +57,7 @@ public class TextReader {
      * @param charset  编码
      * @param n        条数
      * @param positive 是否正序
-     * @return ArrayList<String>
+     * @return {@link java.util.ArrayList<String>}
      */
     public static ArrayList<String> tail(File file, int n, Charset charset, boolean positive) {
         ArrayList<String> arrayList = new ArrayList<>();

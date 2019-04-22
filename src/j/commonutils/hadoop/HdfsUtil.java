@@ -4,14 +4,13 @@ import j.commonutils.text.Regex;
 import j.commonutils.text.StringUtil;
 import j.commonutils.text.UnitUtil;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -231,12 +230,9 @@ public class HdfsUtil {
 
     public boolean moveToTrash(String... path) {
         boolean b = true;
-        String trashPath = "/user/" + user + "/.Trash/";
-        if (!exists(trashPath)) {
-            mkdir(trashPath);
-        }
         for (String s : path) {
-            b &= move(s, trashPath);
+            Path trashPath = fs.getTrashRoot(getPath(s));
+            b &= move(s, trashPath.toString());
         }
         return b;
     }
@@ -301,6 +297,34 @@ public class HdfsUtil {
             }
         }
         return UnitUtil.ByteUtil.toString(totalSize, true);
+    }
+
+    public boolean saveObject(Object o, String path, boolean overwrite) {
+        boolean res = false;
+        try {
+            FSDataOutputStream dataOutputStream = fs.create(getPath(path), overwrite);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(dataOutputStream.getWrappedStream());
+            objectOutputStream.writeObject(o);
+            objectOutputStream.flush();
+            dataOutputStream.close();
+            objectOutputStream.close();
+            res = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    public Object readObject(String path) {
+        Object res = null;
+        try {
+            ObjectInputStream objectInputStream = new ObjectInputStream(fs.open(getPath(path)));
+            res = objectInputStream.readObject();
+            objectInputStream.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return res;
     }
 
 }
