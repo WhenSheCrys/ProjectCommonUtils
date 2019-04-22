@@ -2,6 +2,12 @@ package j.commonutils.encryde;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarOutputStream;
 
 /**
  * @author 刘伯栋
@@ -10,6 +16,50 @@ import java.io.FileInputStream;
  * @date 2019/4/22 10:13
  **/
 public class EncryptUtil {
+
+    /**
+     * Encrypt Class in jar file who's name is start with [prefix]
+     *
+     * @param sourceFile  source jar file
+     * @param destFile    dest jar file
+     * @param prefix      class name prefix
+     * @param encryptions {@link Encryptions}
+     */
+    public static void encryptJar(File sourceFile, File destFile, String prefix, Encryptions encryptions, String key) {
+        try {
+            JarFile sourceJarFile = new JarFile(sourceFile);
+            JarInputStream jarInputStream = new JarInputStream(new FileInputStream(sourceFile));
+            JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(destFile));
+            JarEntry jarEntry = null;
+            while ((jarEntry = jarInputStream.getNextJarEntry()) != null) {
+                InputStream jarEntryInputStream = sourceJarFile.getInputStream(jarEntry);
+                byte[] inputBytes = jarEntryInputStream.readAllBytes();
+                byte[] outputBytes = null;
+                if (jarEntry.getName().startsWith(prefix.replaceAll("\\.", "/")) && !jarEntry.isDirectory()) {
+                    switch (encryptions) {
+                        case AES:
+                            outputBytes = AesEncryption.getInstance().encrypt(inputBytes, key);
+                            break;
+                        case BASE64:
+                            outputBytes = Base64Encryption.getInstance().encrypt(inputBytes);
+                            break;
+                        default:
+                            outputBytes = inputBytes;
+                    }
+                } else {
+                    outputBytes = inputBytes;
+                }
+                jarOutputStream.putNextEntry(jarEntry);
+                jarOutputStream.write(outputBytes);
+                jarEntryInputStream.close();
+            }
+            jarOutputStream.flush();
+            jarOutputStream.finish();
+            jarOutputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Encrypt the given file
