@@ -9,7 +9,7 @@ import java.security.SecureRandom;
 /**
  * @author 刘伯栋
  * @version 1.0
- * @description TODO
+ * @description Encrypt and decrypt using Aes
  * @date 2019/4/22 10:16
  **/
 public class AesEncryption implements EncryptInter {
