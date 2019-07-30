@@ -1,7 +1,7 @@
 package scala.com.nam.bigdata
 
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.types.{StructField, StructType}
+import org.apache.spark.sql.types.StructType
 
 
 /**

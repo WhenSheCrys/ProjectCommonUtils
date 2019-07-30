@@ -1,7 +1,4 @@
 package scala.com.nam.struct.bintree
-import java.util.Comparator
-
-import scala.reflect.ClassTag
 
 /**
   * Created by Namhwik on 2018/6/27.
