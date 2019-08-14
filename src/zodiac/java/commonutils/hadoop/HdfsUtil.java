@@ -6,6 +6,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.*;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import zodiac.java.commonutils.text.UnitUtil;
 
 import java.io.*;
 import java.net.URI;
@@ -75,7 +76,7 @@ public class HdfsUtil {
         return list(path, FileStatus::isDirectory);
     }
 
-    private String[] list(String path, Predicate<FileStatus> fileFilter) {
+    public String[] list(String path, Predicate<FileStatus> fileFilter) {
         ArrayList<String> ret = new ArrayList<>();
         if (exists(path)) {
             if (isDirectory(path)) {
@@ -192,7 +193,7 @@ public class HdfsUtil {
         return chown(user, null, path);
     }
 
-    private FileStatus getFileStatus(String path) {
+    public FileStatus getFileStatus(String path) {
         FileStatus ret = null;
         try {
             ret = fs.getFileStatus(getPath(path));
@@ -203,13 +204,21 @@ public class HdfsUtil {
     }
 
     public boolean rename(String sourcePath, String destPath) {
+        return rename(getPath(sourcePath), getPath(destPath));
+    }
+
+    public boolean rename(Path source, Path dest) {
         boolean ret = false;
         try {
-            ret = fs.rename(getPath(sourcePath), getPath(destPath));
+            ret = fs.rename(source, dest);
         } catch (IOException e) {
-            logger.error("Error when rename " + sourcePath + " to " + destPath, e);
+            logger.error("Error when rename " + source + " to " + dest, e);
         }
         return ret;
+    }
+
+    public boolean move(Path source, Path dest) {
+        return rename(source, dest);
     }
 
     public boolean copy(String sourcePath, String destPath, boolean overwrite) {
@@ -224,6 +233,16 @@ public class HdfsUtil {
 
     public boolean move(String sourcePath, String destPath) {
         return rename(sourcePath, destPath);
+    }
+
+    public boolean moveToTrash(String... paths) {
+        boolean ret = true;
+        for (String path : paths) {
+            Path p = getPath(path);
+            Path trashPath = fs.getTrashRoot(p);
+            ret = ret && move(p, trashPath);
+        }
+        return ret;
     }
 
     public boolean chmod(String path, String mod) {
@@ -270,8 +289,34 @@ public class HdfsUtil {
         return new Path(path);
     }
 
+    public String getParent(String path) {
+        return getPath(path).getParent().toUri().getRawPath();
+    }
+
+    public String getName(String path) {
+        return getPath(path).getName();
+    }
+
     public long getSize(String path) {
         return getFileStatus(path).getLen();
+    }
+
+    public long getTotalFileSize(String... paths) {
+        long total = 0;
+        for (String path : paths) {
+            if (isFile(path)) {
+                total += getSize(path);
+            } else {
+                for (String s : listAllFiles(path)) {
+                    total += getSize(s);
+                }
+            }
+        }
+        return total;
+    }
+
+    public String getTotalFileSizeAsHumanReadable(String... paths) {
+        return UnitUtil.ByteUtil.toString(getTotalFileSize(paths), true);
     }
 
     public boolean saveObject(Object o, String path, boolean overwrite) {
