@@ -7,13 +7,6 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object JdbcUtil {
 
-  def main(args: Array[String]): Unit = {
-    val sparkSession = SparkSession.builder().appName("test").master("local").getOrCreate()
-    jdbcReader().setDbType(DbType.Oracle).setDbHost("172.20.36.25").setDbPort(1521).setDbName("hydb")
-      .setDbUser("PMS_SZ").setDbPassword("PMS_SZ").setDriver("oracle.jdbc.driver.OracleDriver")
-      .setTableName("(SELECT * FROM HS_JLDXX WHERE ROWNUM <= 100)").read.show(false)
-  }
-
   def jdbcReader(): JdbcReader = new JdbcReader()
 
   class JdbcReader {
