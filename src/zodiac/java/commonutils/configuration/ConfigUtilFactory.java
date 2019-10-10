@@ -36,7 +36,7 @@ public class ConfigUtilFactory {
                 case INI:
                     break;
                 case PROPERTIES:
-                    configurationUtilInterface = new PropertiesUtil(fileName, charset);
+                    configurationUtilInterface = new PropertiesConfigUtil(fileName, charset);
                     break;
                 case JSON:
                     break;

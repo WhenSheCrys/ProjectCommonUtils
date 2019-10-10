@@ -11,9 +11,10 @@ import zodiac.java.commonutils.text.UnitUtil;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -25,6 +26,7 @@ public class HdfsUtil {
     private String user = "hdfs";
     private FileSystem fs;
     private final Logger logger = LogManager.getLogger(this.getClass());
+    private Charset defaultCharset = StandardCharsets.UTF_8;
 
     public HdfsUtil(String url) {
         assert StringUtils.isNotBlank(url);
@@ -62,6 +64,10 @@ public class HdfsUtil {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public void setDefaultCharset(Charset defaultCharset) {
+        this.defaultCharset = defaultCharset;
     }
 
     public String[] list(String path) {
@@ -362,66 +368,26 @@ public class HdfsUtil {
     }
 
     private byte[] readAsBytes(String path, int len) {
+        byte[] result = null;
         FSDataInputStream inputStream = getInputStream(path);
         if (len < 0) {
             throw new IllegalArgumentException("len < 0");
         }
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        int read;
         try {
-            List<byte[]> bufs = null;
-            byte[] result = null;
-            int total = 0;
-            int remaining = len;
-            int n;
-            do {
-                byte[] buf = new byte[Math.min(remaining, 8192)];
-                int nread = 0;
-
-                // read to EOF which may read more or less than buffer size
-                while ((n = inputStream.read(buf, nread,
-                        Math.min(buf.length - nread, remaining))) > 0) {
-                    nread += n;
-                    remaining -= n;
-                }
-
-                if (nread > 0) {
-                    if (Integer.MAX_VALUE - 8 - total < nread) {
-                        throw new OutOfMemoryError("Required array size too large");
-                    }
-                    total += nread;
-                    if (result == null) {
-                        result = buf;
-                    } else {
-                        if (bufs == null) {
-                            bufs = new ArrayList<>();
-                            bufs.add(result);
-                        }
-                        bufs.add(buf);
-                    }
-                }
-            } while (n >= 0 && remaining > 0);
-
-            if (bufs == null) {
-                if (result == null) {
-                    return new byte[0];
-                }
-                return result.length == total ?
-                        result : Arrays.copyOf(result, total);
+            int c = 0;
+            while ((read = inputStream.read()) != -1 && c < len) {
+                byteArrayOutputStream.write(read);
+                c++;
             }
-
-            result = new byte[total];
-            int offset = 0;
-            remaining = total;
-            for (byte[] b : bufs) {
-                int count = Math.min(b.length, remaining);
-                System.arraycopy(b, 0, result, offset, count);
-                offset += count;
-                remaining -= count;
-            }
-            return result;
+            result = byteArrayOutputStream.toByteArray();
+            byteArrayOutputStream.close();
+            inputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
+        return result;
     }
 
     public ArrayList<String> readAsString(String path, String charset) {
@@ -439,6 +405,29 @@ public class HdfsUtil {
 
     public ArrayList<String> readAsString(String path) {
         return readAsString(path, "utf-8");
+    }
+
+    public String readAsStringQuickly(String path, String charset) {
+        String result = null;
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            FSDataInputStream fsDataInputStream = getInputStream(path);
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = fsDataInputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, read);
+            }
+            result = byteArrayOutputStream.toString(charset);
+            byteArrayOutputStream.close();
+            fsDataInputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public String readAsStringQuickly(String path) {
+        return readAsStringQuickly(path, defaultCharset.name());
     }
 
     public FSDataOutputStream getOutputStream(String path, boolean overwrite) {

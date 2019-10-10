@@ -38,7 +38,7 @@ public class TimerFactory {
 
     public static void shutdown(String name) {
         synchronized (timerMap) {
-            if (timerMap.contains(name)) {
+            if (timerMap.containsKey(name)) {
                 timerMap.get(name).shutdown();
                 timerMap.remove(name);
             }
@@ -59,6 +59,6 @@ public class TimerFactory {
     }
 
     private static void checkAlreadyExists(String name) {
-        assert !timerMap.contains(name) : String.format("Timer \"%s\" already exists, please use another name or shutdown timer \"%s\" first!", name, name);
+        assert !timerMap.containsKey(name) : String.format("Timer \"%s\" already exists, please use another name or shutdown timer \"%s\" first!", name, name);
     }
 }

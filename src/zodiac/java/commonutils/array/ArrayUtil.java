@@ -2,6 +2,8 @@ package zodiac.java.commonutils.array;
 
 import scala.actors.threadpool.Arrays;
 
+import java.util.*;
+
 public class ArrayUtil {
 
     public static <T> boolean isNotEmpty(T... ts) {
@@ -42,4 +44,13 @@ public class ArrayUtil {
     public static <T> String mkString(String separator, T... ts) {
         return String.join(separator, Arrays.asList(ts));
     }
+
+    public static <T> ArrayList toArrayList(T... ts) {
+        return new ArrayList<>(java.util.Arrays.asList(ts));
+    }
+
+    public static <T>HashSet toHashSet(T... ts) {
+        return new HashSet<>(java.util.Arrays.asList(ts));
+    }
+
 }
