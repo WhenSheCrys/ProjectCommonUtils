@@ -1,4 +1,4 @@
-import zodiac.java.commonutils.hadoop.YarnUtil;
+import org.zodiac.commonutils.hadoop.YarnUtil;
 
 public class TestYarnUtil {
     public static void main(String[] args) {

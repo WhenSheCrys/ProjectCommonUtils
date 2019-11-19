@@ -1,5 +1,5 @@
-import zodiac.java.commonutils.encryde.EncryptUtil;
-import zodiac.java.commonutils.encryde.Encryptions;
+import org.zodiac.commonutils.encryde.EncryptUtil;
+import org.zodiac.commonutils.encryde.Encryptions;
 
 import java.io.File;
 
