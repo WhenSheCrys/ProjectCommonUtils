@@ -48,7 +48,6 @@ public class PropertiesConfigUtil implements ConfigurationUtil {
     }
 
     public boolean contains(String name) {
-        checkKey(name);
         return this.properties.contains(name);
     }
 
